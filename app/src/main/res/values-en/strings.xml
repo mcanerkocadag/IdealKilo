@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Body Mass Index</string>
+    <string name="bay">Man</string>
+    <string name="bayan">Woman</string>
+    <string name="boy_tv">Length</string>
+    <string name="kilo_tv">Weight</string>
+    <string name="cinsiyet">Sexuality</string>
+    <string name="ideal_kilo_tv">Your Ideal Weight</string>
+    <string name="durum">Status</string>
+
+    <string name="zayif">You\'re weak.</string>
+    <string name="ideal">Normal panties here.</string>
+    <string name="normalden_fazla">More than normal weight.</string>
+    <string name="fazla_kilolu">Overweight.</string>
+    <string name="obez">Sorry, you\'re obese.</string>
+    <string name="doktora">Need to doctor treatment.</string>
+</resources>
