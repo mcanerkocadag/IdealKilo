@@ -1,205 +1,181 @@
 package com.lyadirga.idealkilo;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.RadioGroup;
-import android.widget.SeekBar;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.lyadirga.DilEkraniActivity;
-import com.lyadirga.Observable1;
-import com.lyadirga.Observer1;
-import com.lyadirga.ObserverManager;
+import com.lyadirga.observer.ObserverDataRepository;
+import com.lyadirga.observer.ObserverKanal;
+import com.lyadirga.model.Dil;
+import com.lyadirga.model.İnsan;
 
-import java.util.Observable;
+import java.util.Locale;
+import java.util.regex.Pattern;
 
-public class MainActivity extends AppCompatActivity implements Observer1 {
+public class MainActivity extends AppCompatActivity implements ObserverKanal {
 
-    private EditText editText;
-    private TextView boy_tv, durum_tv, ideal_tv, kilo_tv;
-    private SeekBar seekBar;
-    private RadioGroup radioGroup;
-    private boolean erkekmi = true;
-    private double boy = 0.0;
-    private int kilo = 50;
-    private RadioGroup.OnCheckedChangeListener radioGroupOlayIsleyicisi = new RadioGroup.OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(RadioGroup group, int checkedId) {
+    private Pattern COMPILE = Pattern.compile("[-\\[\\]^/,'*:.!><~@#$₺%+=?|\"\\\\() ]+");
 
-            if (checkedId == R.id.bay)
-                erkekmi = true;
-            else if (checkedId == R.id.bayan)
-                erkekmi = false;
+    CheckBox erkek_checkbox;
+    CheckBox kadin_checkbox;
 
-            guncelle();
-
-        }
-    };
-    private SeekBar.OnSeekBarChangeListener seekBarOlayIsleyicisi = new SeekBar.OnSeekBarChangeListener() {
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-            kilo = 30 + progress;
-            guncelle();
-        }
-
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-
-        }
-
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-
-        }
-    };
-    private TextWatcher editTextOlayIsleyicisi = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            try {
-                boy = Double.parseDouble(s.toString()) / 100.0;
-
-            } catch (NumberFormatException e) {
-                boy = 0.0;
-            }
-
-            guncelle();
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-
-        }
-    };
+    EditText boy_et, kilo_et;
+    TextView sonuc_tv, oneri_tv;
+    Button hesapla_btn;
+    ImageView dil_btn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        editText = (EditText) findViewById(R.id.editText);
-        boy_tv = (TextView) findViewById(R.id.boy_tv);
-        durum_tv = (TextView) findViewById(R.id.durum_tv);
-        ideal_tv = (TextView) findViewById(R.id.ideal_tv);
-        kilo_tv = (TextView) findViewById(R.id.kilo_tv);
-        radioGroup = (RadioGroup) findViewById(R.id.radioGrup);
-        seekBar = (SeekBar) findViewById(R.id.seekBar);
+        ObserverDataRepository.getInstance().registerObserver(this);
 
-        editText.addTextChangedListener(editTextOlayIsleyicisi);
-        seekBar.setOnSeekBarChangeListener(seekBarOlayIsleyicisi);
-        radioGroup.setOnCheckedChangeListener(radioGroupOlayIsleyicisi);
+        boy_et = findViewById(R.id.boy_et);
+        kilo_et = findViewById(R.id.kilo_et);
+        sonuc_tv = findViewById(R.id.sonuc_tv);
+        oneri_tv = findViewById(R.id.oneri_tv);
+        hesapla_btn = findViewById(R.id.hesapla_btn);
+        dil_btn = findViewById(R.id.dil_btn);
 
-        findViewById(R.id.durum_tv).setOnClickListener(new View.OnClickListener() {
+        erkek_checkbox = findViewById(R.id.erkek_checkbox);
+        kadin_checkbox = findViewById(R.id.kadin_checkbox);
+
+        erkek_checkbox.setChecked(true);
+        erkek_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View view) {
-                Intent i = new Intent(MainActivity.this, DilEkraniActivity.class);
-                startActivity(i);
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                kadin_checkbox.setChecked(false);
+            }
+        });
+        kadin_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
 
+                erkek_checkbox.setChecked(false);
             }
         });
 
-        guncelle();
-        ObserverManager.getInstance().addObserver(this);
+        hesapla_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                hesapla();
+            }
+        });
+
+        dil_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent dil_ekrani = new Intent(MainActivity.this, DilEkraniActivity.class);
+                startActivity(dil_ekrani);
+            }
+        });
     }
 
-    private void guncelle() {
+    private void hesapla() {
+        İnsan i̇nsan = new İnsan();
+        String boy_str = boy_et.getText().toString();
+        boy_str = boy_str.replaceAll(String.valueOf(COMPILE),"");
+        double boy = Double.parseDouble(boy_str) / 100;
+        i̇nsan.setBoy(boy);
 
-        kilo_tv.setText(String.valueOf(kilo) + " kg");
-        boy_tv.setText(String.valueOf(boy) + " m");
+        String kilo_str = kilo_et.getText().toString();
+        kilo_str = kilo_str.replaceAll(String.valueOf(COMPILE),"");
+        int kilo = Integer.parseInt(kilo_str);
+        i̇nsan.setKilo(kilo);
 
-        int ideal_kiloBay = (int) (50 + 2.3 * (boy * 100 * 0.4 - 60));
-        int ideal_kiloBayan = (int) (45.5 + 2.3 * (boy * 100 * 0.4 - 60));
-        double vki = kilo / (boy * boy);
-
-
-        if (erkekmi) {
-            //erkek ise
-            ideal_tv.setText(String.valueOf(ideal_kiloBay));
-            if (vki <= 20.7) {
-                durum_tv.setBackgroundResource(R.color.zayif);
-                durum_tv.setText(R.string.zayif);
-            } else if (20.7 < vki && vki <= 26.4) {
-                //ideal kilo
-                durum_tv.setText(R.string.ideal);
-                durum_tv.setBackgroundResource(R.color.durum_ideal);
-
-            } else if (26.4 < vki && vki <= 27.8) {
-                //normal kilodan fazla
-                durum_tv.setText(R.string.normalden_fazla);
-                durum_tv.setBackgroundResource(R.color.durum_idealden_fazla);
-
-            } else if (27.8 < vki && vki <= 31.1) {
-                // fazla kilolu
-                durum_tv.setText(R.string.fazla_kilolu);
-                durum_tv.setBackgroundResource(R.color.durum_fazla_kilolu);
-
-            } else if (31.1 < vki && vki <= 34.9) {
-                // obez
-                durum_tv.setText(R.string.obez);
-                durum_tv.setBackgroundResource(R.color.durum_obez);
-            } else {
-                //doktor tedavisi
-                durum_tv.setText(R.string.doktora);
-                durum_tv.setBackgroundResource(R.color.durum_doktora);
-
-            }
-
-
+        if (erkek_checkbox.isChecked()) {
+            i̇nsan.setCinsiyet(1);
         } else {
-            //bayan ise
-            ideal_tv.setText(String.valueOf(ideal_kiloBayan));
-
-            if (vki <= 19.1) {
-                // zayıf
-                durum_tv.setText(R.string.zayif);
-                durum_tv.setBackgroundResource(R.color.zayif);
-
-            } else if (19.1 < vki && vki <= 25.8) {
-                //ideal kilo
-                durum_tv.setText(R.string.ideal);
-                durum_tv.setBackgroundResource(R.color.durum_ideal);
-
-            } else if (25.8 < vki && vki <= 27.3) {
-                //normal kilodan fazla
-                durum_tv.setText(R.string.normalden_fazla);
-                durum_tv.setBackgroundResource(R.color.durum_idealden_fazla);
-            } else if (27.3 < vki && vki <= 32.3) {
-                // fazla kilolu
-                durum_tv.setText(R.string.fazla_kilolu);
-                durum_tv.setBackgroundResource(R.color.durum_fazla_kilolu);
-
-            } else if (32.3 < vki && vki <= 34.9) {
-                // obez
-                durum_tv.setText(R.string.obez);
-                durum_tv.setBackgroundResource(R.color.durum_obez);
-            } else {
-                //doktor tedavisi
-                durum_tv.setText(R.string.doktora);
-                durum_tv.setBackgroundResource(R.color.durum_doktora);
-
-            }
-
-
+            i̇nsan.setCinsiyet(0);
         }
+
+        double vke = kilo / (boy * boy);
+        if (vke < 18.49) {
+            sonuc_tv.setText(R.string.ideal_kilo_alti);
+            oneri_tv.setText(R.string.ideal_kilo_alti_oneri);
+        }
+        if (vke > 18.5 || vke < 24.99) {
+            sonuc_tv.setText(R.string.ideal_kilo);
+            oneri_tv.setText(R.string.ideal_kilo_oneri);
+        }
+        if (vke > 25.0 || vke < 29.99) {
+            sonuc_tv.setText(R.string.ideal_kilo_ustu);
+            oneri_tv.setText(R.string.ideal_kilo_ustu_oneri);
+        }
+        if (vke > 30.0) {
+            sonuc_tv.setText(R.string.obezite);
+            oneri_tv.setText(R.string.obezite_oneri);
+        }
+
+
+
+        //Toast.makeText(this, "" + vke, Toast.LENGTH_LONG).show();
+    }
+
+    public void dileGoreAyarla(){
+        TextView boyunuz_baslik_tv = findViewById(R.id.boyunuz_baslik_tv);
+        boyunuz_baslik_tv.setText(getResources().getString(R.string.boy_tv));
+
+        TextView kilonuz_baslik_tv = findViewById(R.id.kilonuz_baslik_tv);
+        kilonuz_baslik_tv.setText(getResources().getString(R.string.kilo_tv));
+
+        TextView baslik_tv = findViewById(R.id.baslik_tv);
+        baslik_tv.setText(getResources().getString(R.string.vucut_kitle_endeksi));
+
+        TextView erkek_baslik_tv = findViewById(R.id.erkek_baslik_tv);
+        erkek_baslik_tv.setText(getResources().getString(R.string.erkek));
+
+        TextView kadin_baslik_tv = findViewById(R.id.kadin_baslik_tv);
+        kadin_baslik_tv.setText(getResources().getString(R.string.kadin));
+
+        TextView cinsiyet_baslik_tv = findViewById(R.id.cinsiyet_baslik_tv);
+        cinsiyet_baslik_tv.setText(getResources().getString(R.string.cinsiyet));
+
+        hesapla_btn.setText(getResources().getString(R.string.hesapla));
+        sonuc_tv.setText(getResources().getString(R.string.sonuc));
+        kilo_et.setText(getResources().getString(R.string.kilonuzu_giriniz));
+        boy_et.setText(getResources().getString(R.string.boyunuzu_giriniz));
     }
 
     @Override
-    public void update(Observable1 var1, Object var2) {
-        Toast.makeText(this, "" + var2.toString(), Toast.LENGTH_SHORT).show();
-        var1.deleteObserver(this);
+    protected void onDestroy() {
+        super.onDestroy();
+
+        ObserverDataRepository.getInstance().removeObserver(this);
+    }
+
+    @Override
+    public void onUpdate(Object object) {
+
+        Dil dil = (Dil) object;
+       // Toast.makeText(this, "" + dil.getKod(), Toast.LENGTH_SHORT).show();
+        setApplicationLanguage(this, dil.getKod());
+        dileGoreAyarla();
+    }
+
+    public static void setApplicationLanguage(Activity context, String newLanguage) {
+        Resources activityRes = context.getResources();
+        Configuration activityConf = activityRes.getConfiguration();
+        Locale newLocale = new Locale(newLanguage);
+        activityConf.setLocale(newLocale);
+        activityRes.updateConfiguration(activityConf, activityRes.getDisplayMetrics());
+
+        Resources applicationRes = context.getResources();
+        Configuration applicationConf = applicationRes.getConfiguration();
+        applicationConf.setLocale(newLocale);
+        applicationRes.updateConfiguration(applicationConf,
+                applicationRes.getDisplayMetrics());
     }
 }

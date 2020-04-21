@@ -3,7 +3,7 @@
     <string name="app_name">Body Mass Index</string>
     <string name="bay">Man</string>
     <string name="bayan">Woman</string>
-    <string name="boy_tv">Length</string>
+    <string name="boy_tv">Height</string>
     <string name="kilo_tv">Weight</string>
     <string name="cinsiyet">Sexuality</string>
     <string name="ideal_kilo_tv">Your Ideal Weight</string>
@@ -15,4 +15,24 @@
     <string name="fazla_kilolu">Overweight.</string>
     <string name="obez">Sorry, you\'re obese.</string>
     <string name="doktora">Need to doctor treatment.</string>
+    <string name="turkısh">Turkish</string>
+    <string name="close">Close</string>
+    <string name="english">English</string>
+    <string name="language_selection_screen">Language Selection Screen</string>
+    <string name="locale">en</string>
+    <string name="erkek">Man</string>
+    <string name="kadin">Woman</string>
+    <string name="kilonuzu_giriniz">enter your weight</string>
+    <string name="boyunuzu_giriniz">enter your height</string>
+    <string name="dil_secimi">language selection</string>
+    <string name="vucut_kitle_endeksi">Body mass index</string>
+    <string name="sonuc">Your result will be here</string>
+    <string name="hesapla">Calculate</string>
+    <string name="ideal_kilo_alti">İdeal Kilonun Altındasınız.</string>
+    <string name="ideal_kilo">İdeal Kilodasınız.</string>
+    <string name="ideal_kilo_ustu">İdeal Kilonun üzerindesiniz.</string>
+    <string name="obezite">İdeal Kilonun çok üzerindesiniz.</string>
+    <string name="ideal_kilo_alti_oneri">İdeal kilonun altında kalmışsın ama yükselmen için yanındayız! Tek ihtiyacın biraz motivasyon biraz da düzenli ve dengeli beslenme. Biz de tam bunun için varız! Bizi takip et, senin için tüyolarımız var; birlikte başarabiliriz!</string>
+    <string name="ideal_kilo_ustu_oneri">Hedefe yakınsın! Önünde kısa bir yol var. Dengeli beslenme ve düzenli fiziksel aktivite ile tam 12\'den en ideali vurabilirsin!</string>
+    <string name="obezite_oneri">İdeal kilonu biraz uzakta bırakmışsın ama güzel bir haberimiz var; ona kavuşmak sandığın kadar zor değil. Her şey kararlı ve motive olmakla başlıyor, asla pes etme ve motivasyonunu yüksek tut, hareket ve dengeli beslenme hayatının bir parçası olduğunda değişimin hızına sen bile inanamayacaksın. Motivasyonu yüksek tutup, dengeli ve düzenli beslenmeye dikkat edip, hareketi artırarak umduğunuzdan bile kolay olacak. İhtiyacınız olan her şey, okunmak üzere burada sizi bekliyor! Haydi ilk iş olarak biraz ilham al ve harekete geç!</string>
 </resources>
