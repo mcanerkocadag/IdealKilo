@@ -12,9 +12,14 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.lyadirga.sonuc.SonucActivity;
 import com.lyadirga.DilEkraniActivity;
+import com.lyadirga.builder.BuilderListener;
+import com.lyadirga.builder.SonucBuilder;
+import com.lyadirga.fecade.HelperFacade;
 import com.lyadirga.observer.ObserverDataRepository;
 import com.lyadirga.observer.ObserverKanal;
 import com.lyadirga.model.Dil;
@@ -33,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements ObserverKanal {
     EditText boy_et, kilo_et;
     TextView sonuc_tv, oneri_tv;
     Button hesapla_btn;
+    Button sonuc_btn;
     ImageView dil_btn;
 
     @Override
@@ -47,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements ObserverKanal {
         sonuc_tv = findViewById(R.id.sonuc_tv);
         oneri_tv = findViewById(R.id.oneri_tv);
         hesapla_btn = findViewById(R.id.hesapla_btn);
+        sonuc_btn = findViewById(R.id.sonuc_btn);
         dil_btn = findViewById(R.id.dil_btn);
 
         erkek_checkbox = findViewById(R.id.erkek_checkbox);
@@ -56,14 +63,19 @@ public class MainActivity extends AppCompatActivity implements ObserverKanal {
         erkek_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                kadin_checkbox.setChecked(false);
+
+                if (b) {
+                    kadin_checkbox.setChecked(false);
+                }
             }
         });
         kadin_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
 
-                erkek_checkbox.setChecked(false);
+                if (b) {
+                    erkek_checkbox.setChecked(false);
+                }
             }
         });
 
@@ -81,18 +93,31 @@ public class MainActivity extends AppCompatActivity implements ObserverKanal {
                 startActivity(dil_ekrani);
             }
         });
+
+        sonuc_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, SonucActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void hesapla() {
         İnsan i̇nsan = new İnsan();
         String boy_str = boy_et.getText().toString();
-        boy_str = boy_str.replaceAll(String.valueOf(COMPILE),"");
-        double boy = Double.parseDouble(boy_str) / 100;
-        i̇nsan.setBoy(boy);
+        boy_str = boy_str.replaceAll(String.valueOf(COMPILE), "");
 
         String kilo_str = kilo_et.getText().toString();
-        kilo_str = kilo_str.replaceAll(String.valueOf(COMPILE),"");
-        int kilo = Integer.parseInt(kilo_str);
+        kilo_str = kilo_str.replaceAll(String.valueOf(COMPILE), "");
+
+        if (boy_str.trim().isEmpty() || kilo_str.trim().isEmpty())
+            return;
+
+        final double boy = Double.parseDouble(boy_str) / 100;
+        i̇nsan.setBoy(boy);
+
+        final int kilo = Integer.parseInt(kilo_str);
         i̇nsan.setKilo(kilo);
 
         if (erkek_checkbox.isChecked()) {
@@ -101,30 +126,31 @@ public class MainActivity extends AppCompatActivity implements ObserverKanal {
             i̇nsan.setCinsiyet(0);
         }
 
-        double vke = kilo / (boy * boy);
-        if (vke < 18.49) {
-            sonuc_tv.setText(R.string.ideal_kilo_alti);
-            oneri_tv.setText(R.string.ideal_kilo_alti_oneri);
-        }
-        if (vke > 18.5 || vke < 24.99) {
-            sonuc_tv.setText(R.string.ideal_kilo);
-            oneri_tv.setText(R.string.ideal_kilo_oneri);
-        }
-        if (vke > 25.0 || vke < 29.99) {
-            sonuc_tv.setText(R.string.ideal_kilo_ustu);
-            oneri_tv.setText(R.string.ideal_kilo_ustu_oneri);
-        }
-        if (vke > 30.0) {
-            sonuc_tv.setText(R.string.obezite);
-            oneri_tv.setText(R.string.obezite_oneri);
-        }
+        /**
+         * Builder pattern kullanımı
+         */
+        new SonucBuilder()
+                .Builder(this)
+                .Boy(boy)
+                .Kilo(kilo)
+                .BuilderListener(new BuilderListener() {
+                    @Override
+                    public void Sonuc(String sonuc, String oneri) {
+                        sonuc_tv.setText(sonuc);
+                        oneri_tv.setText(oneri);
 
-
-
-        //Toast.makeText(this, "" + vke, Toast.LENGTH_LONG).show();
+                        HelperFacade.saveDate(MainActivity.this,
+                                HelperFacade.DBTypes.SQLITE,
+                                sonuc,
+                                oneri,
+                                boy,
+                                kilo);
+                    }
+                })
+                .build();
     }
 
-    public void dileGoreAyarla(){
+    public void dileGoreAyarla() {
         TextView boyunuz_baslik_tv = findViewById(R.id.boyunuz_baslik_tv);
         boyunuz_baslik_tv.setText(getResources().getString(R.string.boy_tv));
 
@@ -144,6 +170,7 @@ public class MainActivity extends AppCompatActivity implements ObserverKanal {
         cinsiyet_baslik_tv.setText(getResources().getString(R.string.cinsiyet));
 
         hesapla_btn.setText(getResources().getString(R.string.hesapla));
+        sonuc_btn.setText(getResources().getString(R.string.sonuc_ekrani));
         sonuc_tv.setText(getResources().getString(R.string.sonuc));
         kilo_et.setText(getResources().getString(R.string.kilonuzu_giriniz));
         boy_et.setText(getResources().getString(R.string.boyunuzu_giriniz));
@@ -160,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements ObserverKanal {
     public void onUpdate(Object object) {
 
         Dil dil = (Dil) object;
-       // Toast.makeText(this, "" + dil.getKod(), Toast.LENGTH_SHORT).show();
+        // Toast.makeText(this, "" + dil.getKod(), Toast.LENGTH_SHORT).show();
         setApplicationLanguage(this, dil.getKod());
         dileGoreAyarla();
     }
